@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no">
+	<title>Mercado Livre - Página Aleatória</title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<style type="text/css">
+		#peraai {
+			font-size: 9vw;
+			color: white;
+			font-family: Helvetica;
+		}
+		#corpo {
+			display: flex;
+			justify-content: space-around;
+			flex-direction: column;
+			align-items: center;
+			height: 97vh;
+			width: 97vw;
+			margin: 0;
+			padding: 0;
+			overflow: hidden;
+		}
+	</style>
+</head>
+<body onload="consultarAPI()" style="background-color: black;">
+
+	<div id="corpo">
+		<svg width="50vmin"  height="50vmin"  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" class="lds-double-ring" style="background: none;"><circle cx="50" cy="50" ng-attr-r="{{config.radius}}" ng-attr-stroke-width="{{config.width}}" ng-attr-stroke="{{config.c1}}" ng-attr-stroke-dasharray="{{config.dasharray}}" fill="none" stroke-linecap="round" r="40" stroke-width="4" stroke="#3f1191" stroke-dasharray="62.83185307179586 62.83185307179586" transform="rotate(296.359 50 50)"><animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 50 50;360 50 50" keyTimes="0;1" dur="5s" begin="0s" repeatCount="indefinite"></animateTransform></circle><circle cx="50" cy="50" ng-attr-r="{{config.radius2}}" ng-attr-stroke-width="{{config.width}}" ng-attr-stroke="{{config.c2}}" ng-attr-stroke-dasharray="{{config.dasharray2}}" ng-attr-stroke-dashoffset="{{config.dashoffset2}}" fill="none" stroke-linecap="round" r="35" stroke-width="4" stroke="#0050e7" stroke-dasharray="54.97787143782138 54.97787143782138" stroke-dashoffset="54.97787143782138" transform="rotate(-296.359 50 50)"><animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 50 50;-360 50 50" keyTimes="0;1" dur="5s" begin="0s" repeatCount="indefinite"></animateTransform></circle></svg>
+		<h1 id="peraai">Pera aí...</h1>
+	</div>
+
+</body>
+<script type="text/javascript">
+
+	/*
+		Mercado Livre - Página Aleatória
+		Versão: 0.5 alpha
+
+		Autor: Matheus Alves de Andrade
+		matheusalves.com.br
+
+		Desenvolvido em 11/03/2019
+
+		Esta página redireciona o usuário para um produto aleatório no Mercado Livre.
+		Foi deselvolvida a pedido do Streamer Felps (Felipe Zaghetti) em 11/03/2019.
+	*/
+
+	var CORS_PROXY = 'https://cors-anywhere.herokuapp.com/';
+	function consultarAPI() {
+		$.ajax({
+			url: 'https://www.mercadolivre.com.br/menu/departments',
+			success: (r) => {
+				let departamentos = r.departments;
+				let departamento = departamentos[getRandomInt(0, departamentos.length-1)];
+
+				let categorias = departamento.categories;
+				let categoria = categorias[getRandomInt(0, categorias.length-1)];
+
+				let subCategorias = categoria.children_categories;
+				let subCategoria = subCategorias[getRandomInt(0, subCategorias.length-1)];
+
+				lerPaginaCategoria(escolherPaginaAleatoria(subCategoria.permalink));
+			},
+			error: r => consultarAPI()
+		});
+	}
+
+	function lerPaginaCategoria(url) {
+		produtosBruto = /(https:\/\/produto\.mercadolivre\.com\.br)([^\"])+(\")?/g;
+		$.ajax({
+			url: CORS_PROXY+url,
+			success: (r) => {
+				let vetorProdutos = [];
+
+				do {
+				    m = produtosBruto.exec(r);
+				    if (m) {
+				        let urlNovoProduto = m[0].split('"')[0];
+				        if(!vetorProdutos.includes(urlNovoProduto))
+				        	vetorProdutos.push(urlNovoProduto);
+				    }
+				} while (m);
+
+				finalizarEscolhaAleatoria(vetorProdutos[getRandomInt(0, vetorProdutos.length-1)]);
+			}
+		});
+	}
+
+	function finalizarEscolhaAleatoria(url) {
+		window.location = url;
+	}
+
+	function escolherPaginaAleatoria( url ) {
+		url = url.split('#')[0];
+		return url+'_Desde_'+getRandomInt(0, 500);
+	}
+
+	function getRandomInt(min, max) {
+	  min = Math.ceil(min);
+	  max = Math.floor(max);
+	  return Math.floor(Math.random() * (max - min)) + min;
+	}
+</script>
+</html>
