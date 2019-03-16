@@ -48,6 +48,7 @@
 	*/
 
 	var CORS_PROXY = 'https://cors-anywhere.herokuapp.com/';
+	var ALT_CORS_PROXY = 'https://shielded-wave-91088.herokuapp.com/';
 	function consultarAPI() {
 		$.ajax({
 			url: 'https://www.mercadolivre.com.br/menu/departments',
@@ -74,10 +75,11 @@
 		});
 	}
 
-	function lerPaginaCategoria(url) {
+	function lerPaginaCategoria(url, proxy = CORS_PROXY) {
 		produtosBruto = /(https:\/\/produto\.mercadolivre\.com\.br)([^\"])+(\")?/g;
 		$.ajax({
-			url: CORS_PROXY+url,
+			url: proxy+url,
+			timeout: 5000,
 			success: (r) => {
 				let vetorProdutos = [];
 
@@ -91,7 +93,8 @@
 				} while (m);
 
 				finalizarEscolhaAleatoria(vetorProdutos[getRandomInt(0, vetorProdutos.length-1)]);
-			}
+			},
+			error: r => lerPaginaCategoria(url, ALT_CORS_PROXY)
 		});
 	}
 
