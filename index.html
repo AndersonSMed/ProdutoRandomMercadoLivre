@@ -79,7 +79,7 @@
 		produtosBruto = /(https:\/\/produto\.mercadolivre\.com\.br)([^\"])+(\")?/g;
 		$.ajax({
 			url: proxy+url,
-			timeout: 5000,
+			timeout: 3000, // Espere no máximo 3 segundos pela resposta
 			success: (r) => {
 				let vetorProdutos = [];
 
